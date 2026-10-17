@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>캐나다 → 한국 우체국택배 예상요금 계산기</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    padding: 20px;
+  }
+  .container {
+    max-width: 480px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  h2 {
+    text-align: center;
+    color: #d32f2f;
+  }
+  img {
+    display: block;
+    margin: auto;
+    width: 120px;
+  }
+  label {
+    font-weight: bold;
+  }
+  input {
+    width: 100%;
+    padding: 8px;
+    margin: 6px 0 12px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #b71c1c;
+  }
+  #result {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #003366;
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+  <img src="YOUR_IMAGE_URL_HERE" alt="우체국 로봇">
+  <h2>캐나다 → 한국<br>우체국택배 예상요금 계산기</h2>
+
+  <label>무게 (kg)</label>
+  <input id="weight" type="number" step="0.01">
+
+  <label>가로 (cm)</label>
+  <input id="length" type="number">
+
+  <label>세로 (cm)</label>
+  <input id="width" type="number">
+
+  <label>높이 (cm)</label>
+  <input id="height" type="number">
+
+  <button onclick="calcPost()">예상 택배비 계산하기</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+function calcPost() {
+  const w = parseFloat(document.getElementById('weight').value);
+  const L = parseFloat(document.getElementById('length').value);
+  const W = parseFloat(document.getElementById('width').value);
+  const H = parseFloat(document.getElementById('height').value);
+
+  if (isNaN(w) || w <= 0) {
+    alert('무게를 입력하세요.');
+    return;
+  }
+
+  // 박스 추가중량 규칙
+  let wBox = w;
+  if (w <= 2) wBox += 0.2;
+  else if (w <= 5) wBox += 0.3;
+  else if (w <= 8) wBox += 0.5;
+
+  // 부피중량 (5000 규칙)
+  let wVol = null;
+  if (!isNaN(L) && !isNaN(W) && !isNaN(H) && L>0 && W>0 && H>0) {
+    wVol = (L * W * H) / 5000;
+  }
+
+  // 청구중량 = 박스중량 vs 부피중량 중 큰 값
+  let chargeWeight = wBox;
+  if (wVol && wVol > wBox) chargeWeight = wVol;
+
+  // CAD 요금표 (엑셀 RATE 기준 전체 반영)
+  const rateTable = [
+    {min:0, max:0.5, fee:25},
+    {min:0.51, max:1, fee:35},
+    {min:1.01, max:1.5, fee:40},
+    {min:1.51, max:2, fee:45},
+    {min:2.01, max:2.5, fee:55},
+    {min:2.51, max:3, fee:65},
+    {min:3.01, max:3.5, fee:70},
+    {min:3.51, max:4, fee:75},
+    {min:4.01, max:4.5, fee:80},
+    {min:4.51, max:5, fee:85},
+    {min:5.01, max:5.5, fee:90},
+    {min:5.51, max:6, fee:95},
+    {min:6.01, max:6.5, fee:100},
+    {min:6.51, max:7, fee:105},
+    {min:7.01, max:7.5, fee:110},
+    {min:7.51, max:8, fee:115},
+    {min:8.01, max:8.5, fee:120},
+    {min:8.51, max:9, fee:125},
+    {min:9.01, max:9.5, fee:130},
+    {min:9.51, max:10, fee:135},
+    {min:10.01, max:11, fee:140},
+    {min:11.01, max:12, fee:145},
+    {min:12.01, max:13, fee:150},
+    {min:13.01, max:14, fee:155},
+    {min:14.01, max:15, fee:160},
+    {min:15.01, max:16, fee:165},
+    {min:16.01, max:17, fee:170},
+    {min:17.01, max:18, fee:175},
+    {min:18.01, max:19, fee:180},
+    {min:19.01, max:20, fee:185},
+    {min:20.01, max:21, fee:190},
+    {min:21.01, max:22, fee:195},
+    {min:22.01, max:23, fee:200},
+    {min:23.01, max:24, fee:205},
+    {min:24.01, max:25, fee:210},
+    {min:25.01, max:26, fee:215},
+    {min:26.01, max:27, fee:220},
+    {min:27.01, max:28, fee:225},
+    {min:28.01, max:29, fee:230},
+    {min:29.01, max:30, fee:235},
+    {min:30.01, max:31, fee:245},
+    {min:31.01, max:32, fee:255},
+    {min:32.01, max:33, fee:265},
+    {min:33.01, max:34, fee:275},
+    {min:34.01, max:35, fee:285},
+    {min:35.01, max:36, fee:295},
+    {min:36.01, max:37, fee:305},
+    {min:37.01, max:38, fee:315},
+    {min:38.01, max:39, fee:325},
+    {min:39.01, max:40, fee:335},
+    {min:40.01, max:41, fee:345},
+    {min:41.01, max:42, fee:355},
+    {min:42.01, max:43, fee:365},
+    {min:43.01, max:44, fee:375},
+    {min:44.01, max:45, fee:385},
+    {min:45.01, max:46, fee:390},
+    {min:46.01, max:47, fee:395},
+    {min:47.01, max:48, fee:405},
+    {min:48.01, max:49, fee:415},
+    {min:49.01, max:50, fee:425}
+  ];
+
+  let fee = null;
+  for (let band of rateTable) {
+    if (chargeWeight >= band.min && chargeWeight <= band.max) {
+      fee = band.fee;
+      break;
+    }
+  }
+
+  const res = document.getElementById('result');
+  if (fee === null) {
+    res.innerHTML = `청구중량: ${chargeWeight.toFixed(2)} kg<br>요금표 범위를 초과했습니다.`;
+  } else {
+    res.innerHTML =
+      `청구중량(예상): ${chargeWeight.toFixed(2)} kg<br>` +
+      `예상 택배비: ${fee.toFixed(2)} CAD`;
+  }
+}
+</script>
+
+</body>
+</html>
